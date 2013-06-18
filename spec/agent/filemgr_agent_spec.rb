@@ -60,6 +60,43 @@ module MCollective
         end
       end
 
+      describe "list" do
+        it "should fail if it cannot read the directory" do
+          File.stubs(:exists?).with("/tmp/rspec").returns(false)
+          result = @agent.call(:list, :dir => "/tmp/rspec")
+          result.should be_aborted_error
+        end
+
+        it "should fail if the target isn't a directory" do
+          File.stubs(:exists?).with("/tmp/rspec").returns(true)
+          File.stubs(:directory?).with("/tmp/rspec").returns(false)
+          result = @agent.call(:list, :dir => "/tmp/rspec")
+          result.should be_aborted_error
+        end
+
+        it "should return the list of files in the directory as an array" do
+          File.stubs(:exists?).with("/tmp/rspec").returns(true)
+          File.stubs(:directory?).with("/tmp/rspec").returns(true)
+          Dir.stubs(:glob).with("/tmp/rspec/*").returns(["/tmp/rspec/file.1", "/tmp/rspec/file.2"])
+          result = @agent.call(:list, :dir => "/tmp/rspec")
+          result.should be_successful
+          result.should have_data_items(:files => ["/tmp/rspec/file.1", "/tmp/rspec/file.2"])
+        end
+
+        it "should return a array of hashes containing detailed file information if 'details' is set" do
+          stats1 = {:name => "file.1", :output => "present", :mode => "600"}
+          stats2 = {:name => "file.2", :output => "present", :mode => "700"}
+          File.stubs(:exists?).with("/tmp/rspec").returns(true)
+          File.stubs(:directory?).with("/tmp/rspec").returns(true)
+          Dir.stubs(:glob).with("/tmp/rspec/*").returns(["/tmp/rspec/file.1", "/tmp/rspec/file.2"])
+          @agent.expects(:status).with("/tmp/rspec/file.1").returns(stats1)
+          @agent.expects(:status).with("/tmp/rspec/file.2").returns(stats2)
+          result = @agent.call(:list, {:dir => "/tmp/rspec", :details => true})
+          result.should be_successful
+          result.should have_data_items(:files => [{"/tmp/rspec/file.1" => stats1}, {"/tmp/rspec/file.2" => stats2}])
+        end
+      end
+
       describe "status" do
         it "should fail if the file isn't present" do
           File.expects(:exists?).with("/tmp/foo").returns(false)
@@ -67,10 +104,34 @@ module MCollective
           result.should be_aborted_error
         end
 
+        it "should return the default values if the file if present but cannot be read" do
+          File.expects(:exists?).with("/tmp/foo").returns(true)
+          File.expects(:readable?).with("/tmp/foo").returns(false)
+
+          result = @agent.call(:status, :file => "/tmp/foo")
+          result.should be_successful
+          result.should have_data_items(:output => "you do not have permission to read this file",
+                                        :name => "/tmp/foo",
+                                        :type => "unknown",
+                                        :mode => "0000",
+                                        :present => 1,
+                                        :size => 0,
+                                        :mtime => 0,
+                                        :ctime => 0,
+                                        :atime => 0,
+                                        :mtime_seconds => 0,
+                                        :ctime_seconds => 0,
+                                        :atime_seconds => 0,
+                                        :md5 => 0,
+                                        :uid => 0,
+                                        :gid => 0)
+        end
+
         it "should return the file status" do
           stat = mock
 
           File.expects(:exists?).with("/tmp/foo").returns(true)
+          File.expects(:readable?).with("/tmp/foo").returns(true)
           File.expects(:symlink?).returns(false)
           File.expects(:stat).with("/tmp/foo").returns(stat)
           File.stubs(:read).returns("")

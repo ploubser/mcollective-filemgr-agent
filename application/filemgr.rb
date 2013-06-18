@@ -1,6 +1,6 @@
 class MCollective::Application::Filemgr<MCollective::Application
   description "Generic File Manager Client"
-  usage "Usage: mco filemgr [--file FILE] [touch|remove|status]"
+  usage "Usage: mco filemgr [--file FILE] [touch|remove|status|list]"
 
   option :file,
          :description    => "File to manage",
@@ -30,6 +30,9 @@ class MCollective::Application::Filemgr<MCollective::Application
     when "touch"
       printrpc mc.touch(:file => configuration[:file])
 
+    when "list"
+      printrpc mc.list(:dir => configuration[:file], :details => (configuration[:details] || false))
+
     when "status"
       if configuration[:details]
         printrpc mc.status(:file => configuration[:file])
@@ -40,8 +43,7 @@ class MCollective::Application::Filemgr<MCollective::Application
       end
 
     else
-      puts "Valid commands are 'touch', 'status', and 'remove'"
-      exit 1
+      raise "Valid commands are 'touch', 'status', 'list' and 'remove'"
     end
 
     printrpcstats

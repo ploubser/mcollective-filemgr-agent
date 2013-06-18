@@ -2,7 +2,7 @@ metadata    :name        => "filemgr",
             :description => "File Manager",
             :author      => "Mike Pountney <mike.pountney@gmail.com>",
             :license     => "ASL 2.0",
-            :version     => "1.0.1",
+            :version     => "1.1.0",
             :url         => "http://www.puppetlabs.com/mcollective",
             :timeout     => 5
 
@@ -15,7 +15,30 @@ action "touch", :description => "Creates an empty file or touch it's timestamp" 
           :type        => :string,
           :validation  => '^.+$',
           :optional    => true,
-          :maxlength    => 256
+          :maxlength   => 256
+end
+
+action "list", :description => "Lists a directory's contents" do
+    display :always
+
+    input :dir,
+          :prompt      => "Directory",
+          :description => "Directory contents to display",
+          :type        => :string,
+          :validation  => :string,
+          :optional    => false,
+          :maxlength   => 256
+
+    input :details,
+          :prompt      => "Show details?",
+          :description => "Add details about the files found in the directory",
+          :type        => :boolean,
+          :validation  => :boolean,
+          :optional    => true
+
+    output :files,
+           :description => "Files contained in the directory",
+           :display_as  => "Files"
 end
 
 action "remove", :description => "Removes a file" do
@@ -25,7 +48,7 @@ action "remove", :description => "Removes a file" do
           :type        => :string,
           :validation  => '^.+$',
           :optional    => true,
-          :maxlength    => 256
+          :maxlength   => 256
 end
 
 action "status", :description => "Basic information about a file" do
@@ -37,65 +60,65 @@ action "status", :description => "Basic information about a file" do
           :type        => :string,
           :validation  => '^.+$',
           :optional    => true,
-          :maxlength    => 256
+          :maxlength   => 256
 
     output :name,
            :description => "File name",
-           :display_as => "Name"
+           :display_as  => "Name"
 
     output :output,
            :description => "Human readable information about the file",
-           :display_as => "Status"
+           :display_as  => "Status"
 
     output :present,
            :description => "Indicates if the file exist using 0 or 1",
-           :display_as => "Present"
+           :display_as  => "Present"
 
     output :size,
            :description => "File size",
-           :display_as => "Size"
+           :display_as  => "Size"
 
     output :mode,
            :description => "File mode",
-           :display_as => "Mode"
+           :display_as  => "Mode"
 
     output :md5,
            :description => "File MD5 digest",
-           :display_as => "MD5"
+           :display_as  => "MD5"
 
     output :mtime,
            :description => "File modification time",
-           :display_as => "Modification time"
+           :display_as  => "Modification time"
 
     output :ctime,
            :description => "File change time",
-           :display_as => "Change time"
+           :display_as  => "Change time"
 
     output :atime,
            :description => "File access time",
-           :display_as => "Access time"
+           :display_as  => "Access time"
 
     output :mtime_seconds,
            :description => "File modification time in seconds",
-           :display_as => "Modification time"
+           :display_as  => "Modification time"
 
     output :ctime_seconds,
            :description => "File change time in seconds",
-           :display_as => "Change time"
+           :display_as  => "Change time"
 
     output :atime_seconds,
            :description => "File access time in seconds",
-           :display_as => "Access time"
+           :display_as  => "Access time"
 
     output :uid,
            :description => "File owner",
-           :display_as => "Owner"
+           :display_as  => "Owner"
 
     output :gid,
            :description => "File group",
-           :display_as => "Group"
+           :display_as  => "Group"
 
     output :type,
            :description => "File type",
-           :display_as => "Type"
+           :display_as  => "Type"
 end

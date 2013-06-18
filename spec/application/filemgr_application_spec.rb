@@ -55,6 +55,23 @@ module MCollective
           @app.main
         end
 
+        it 'should call and print the results of list' do
+          @app.configuration[:command] = 'list'
+          @app.configuration[:file] = '/tmp/rspec'
+          rpcclient.expects(:list).with(:dir => '/tmp/rspec', :details => false)
+          @app.expects(:printrpc)
+          @app.main
+        end
+
+        it 'should call and print the results of list with details' do
+          @app.configuration[:command] = 'list'
+          @app.configuration[:file] = '/tmp/rspec'
+          @app.configuration[:details] = true
+          rpcclient.expects(:list).with(:dir => '/tmp/rspec', :details => true)
+          @app.expects(:printrpc)
+          @app.main
+        end
+
         it 'should call and print the results of status if details is configured' do
           @app.configuration[:command] = 'status'
           @app.configuration[:details] = true
